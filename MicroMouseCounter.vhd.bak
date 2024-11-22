@@ -1,68 +1,68 @@
--- Quartus II VHDL Template
--- Binary Up/Down Counter with Saturation
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity binary_up_down_counter_with_saturation is
+entity MicroMouseCounter is
+    generic
+    (
+        MIN_COUNT : natural := 0;
+        MAX_COUNT : natural := 31 -- Rango máximo definido (5 bits)
+    );
 
-	generic
-	(
-		MIN_COUNT : natural := 0;
-		MAX_COUNT : natural := 31
-	);
-
-	port 
-	(
-		clk		   : in std_logic;
-		reset	   : in std_logic;
-		enable	   : in std_logic;
-		updown	   : in std_logic;
-		q		   : out integer range MIN_COUNT to MAX_COUNT
-	);
+    port 
+    (
+        clk      : in  std_logic;
+        reset    : in  std_logic;
+        enable   : in  std_logic;
+        updown   : in  std_logic;
+        q0       : out std_logic; -- Bit menos significativo
+        q1       : out std_logic;
+        q2       : out std_logic;
+        q3       : out std_logic;
+        q4       : out std_logic  -- Bit más significativo
+    );
 
 end entity;
 
-architecture Counter of binary_up_down_counter_with_saturation is
-	signal direction : integer;
-	signal limit : integer range MIN_COUNT to MAX_COUNT;
+architecture rtl of MicroMouseCounter is
+    signal direction : integer;
+    signal limit     : integer range MIN_COUNT to MAX_COUNT;
+    signal cnt       : integer range MIN_COUNT to MAX_COUNT := 0;
+    signal q_vector  : std_logic_vector(4 downto 0); -- Vector auxiliar para dividir las salidas
 begin
 
-	process (updown)
-	begin
-		-- Set counter increment/decrement, and corresponding limit
-		if (updown = '1') then
-			direction <= 1;
-			limit <= MAX_COUNT;
-		else
-			direction <= -1;
-			limit <= MIN_COUNT;
-		end if;
-	end process;
+    -- Proceso para determinar la dirección y el límite
+    process (updown)
+    begin
+        if (updown = '1') then
+            direction <= 1;       -- Incremento
+            limit <= MAX_COUNT;   -- Límite superior
+        else
+            direction <= -1;      -- Decremento
+            limit <= MIN_COUNT;   -- Límite inferior
+        end if;
+    end process;
 
+    -- Proceso para actualizar el contador
+    process (clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '0' then
+                cnt <= 0; -- Reiniciar el contador
+            elsif enable = '1' and cnt /= limit then
+                cnt <= cnt + direction; -- Incrementar o decrementar
+            end if;
+        end if;
+    end process;
 
-	process (clk)
-		variable cnt : integer range MIN_COUNT to MAX_COUNT;
-	begin
+    -- Convertir el entero a un vector binario
+    q_vector <= std_logic_vector(to_unsigned(cnt, q_vector'length));
 
-		-- Synchronously update the counter
-		if (rising_edge(clk)) then
+    -- Asignar cada bit del vector a las salidas individuales
+    q0 <= q_vector(0);
+    q1 <= q_vector(1);
+    q2 <= q_vector(2);
+    q3 <= q_vector(3);
+    q4 <= q_vector(4);
 
-			if (reset = '1') then
-				-- Reset the counter to 0
-				cnt := 0;
-
-			elsif (enable = '1' and cnt /= limit) then
-				-- Increment/decrement the counter, 
-				-- if the limit is not exceeded
-				cnt := cnt + direction;
-
-			end if;
-		end if;
-
-		-- Output the current count
-		q <= cnt;
-	end process;
-
-end Counter;
+end rtl;

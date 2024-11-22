@@ -37,7 +37,7 @@ begin
 				case prox is
 				
 					when no_presionado =>
-						if boton_i = '1' then 
+						if boton_i = '0' then 
 							prox <= contando1;
 						else	
 							prox <= no_presionado;

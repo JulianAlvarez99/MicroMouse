@@ -2,18 +2,18 @@ library IEEE;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 ------------------------------------------------------------------------------------------------
-entity Antirebote is
+entity Antirrebote is
 	generic(N	:positive :=4);
 	port	 (clk_i	: in std_logic;
 			  rst_i	: in std_logic;
 			  boton_i : in std_logic;
 			  led_o : out std_logic_vector(N-1 downto 0));
-end entity Antirebote;
+end entity Antirrebote;
 ------------------------------------------------------------------------------------------------
 -- DEMORA DE 12 CLK, DOS CONTADORES ANIDADOS, UNO CUENTA DE 0 A 3 (OSEA 4 CLK) Y EL 
 -- OTRO CUENTA DE 0 A 2 (OSEA 3 PULSOS DE CONTADOR) 4X3 = 12 CLK EN TOTAL
 
-architecture Arq of Antirebote is
+architecture Arq of Antirrebote is
 	type estado is (no_presionado, contando1, contando2, espera_liberacion);
 	signal prox	:estado;
 	signal cuenta	: unsigned (N-1 downto 0);
