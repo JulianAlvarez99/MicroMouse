@@ -47,7 +47,7 @@ begin
     process (clk)
     begin
         if rising_edge(clk) then
-            if reset = '1' then
+            if reset = '0' then
                 cnt <= 0; -- Reiniciar el contador
             elsif enable = '1' and cnt /= limit then
                 cnt <= cnt + direction; -- Incrementar o decrementar
